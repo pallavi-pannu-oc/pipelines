@@ -15,11 +15,11 @@ dkube_serving_op = component_store.load_component("serving")
     description='sample multimodel pipeline with dkube components'
 )
 def multimodel_pipeline(model):
-  
-  model_volume = json.dumps(["{{workflow.uid}}-model@model://" + str(model)])
-  storage = storage_op("export", namespace="kubeflow", input_volumes=model_volume)
-  
-  list_models = kfp.dsl.ContainerOp(name="list-models",image="alpine",command="bash",arguments=["-c", "ls /model"],
-                                    pvolumes={"/model": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-model")}})
-  
-  serving = dkube_serving_op(model = str(model) , device='cpu', serving_image='{"image":"ocdr/inf-multimodel:latest"}')
+    with kfp.dsl.ExitHandler(exit_op=storage_op("reclaim", namespace="kubeflow", uid="{{workflow.uid}}")):
+        model_volume = json.dumps(["{{workflow.uid}}-model@model://" + str(model)])
+        storage = storage_op("export", namespace="kubeflow", input_volumes=model_volume)
+
+        list_models = kfp.dsl.ContainerOp(name="list-models",image="alpine",command="bash",arguments=["-c", "ls /model"],
+                                        pvolumes={"/model": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-model")}})
+
+        serving = dkube_serving_op(model = str(model) , device='cpu', serving_image='{"image":"ocdr/inf-multimodel:latest"}')

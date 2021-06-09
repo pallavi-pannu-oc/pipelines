@@ -19,10 +19,10 @@ def multimodel_pipeline(model):
         
         model_volume = json.dumps(["{{workflow.uid}}-model@model://" + str(model)])
         
-        storage = storage_op("export",token,namespace="kubeflow", input_volumes=model_volume)
+        storage = storage_op("export",namespace="kubeflow", input_volumes=model_volume)
 
         list_models = kfp.dsl.ContainerOp(name="container-op",image="docker.io/ocdr/dkube-datascience-tf-cpu:v2.0.0-3",command="bash",arguments=["-c", "ls /model"],
                                         pvolumes={"/model": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-model")}).after(storage)
 
-        serving = dkube_serving_op(auth_token=token,model = model , device='cpu', serving_image='{"image":"ocdr/inf-multimodel:latest"}').after(storage)
+        serving = dkube_serving_op(model = model , device='cpu', serving_image='{"image":"ocdr/inf-multimodel:latest"}').after(storage)
 

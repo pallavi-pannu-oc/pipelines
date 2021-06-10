@@ -3,9 +3,9 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
 DATA_DIR = "/opt/dkube/input"
-MODEL_DIR = "/opt/dkube/output"
+MODEL_DIR = "/opt/dkube/output/"
 
-arv_data = np.fromfile(DATA_DIR+'CMU-1/Data0000.dat', dtype=float)
+arv_data = np.fromfile(DATA_DIR+'/CMU-1/Data0000.dat', dtype=float)
 arv_data = arv_data[~np.isnan(arv_data)]
 arv_data = arv_data.reshape(-1,1)
 arv_data[arv_data <= 1E308] = 0

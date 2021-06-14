@@ -24,5 +24,5 @@ def multimodel_pipeline(model):
         list_models = kfp.dsl.ContainerOp(name="container-op",image="docker.io/ocdr/dkube-datascience-tf-cpu:v2.0.0-3",command="bash",arguments=["-c", "ls /model"],
                                         pvolumes={"/model": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-model")}).after(storage)
 
-        serving = dkube_serving_op(model = model , device='cpu', serving_image='{"image":"ocdr/inf-multimodel:latest"}').after(storage)
+        serving = dkube_serving_op(model = str(model), device='cpu', serving_image='{"image":"ocdr/inf-multimodel:latest"}').after(storage)
 

@@ -22,7 +22,6 @@ def homedircode_pipeline(code,dataset,model,dataset_mount_path,model_mount_path)
     
     train       = dkube_training_op(token, '{"image":"ocdr/dkube-datascience-tf-cpu:v2.0.0"}',
                                     framework="custom",
-                                    program = str(code),
                                     version = "dummy",
                                     run_script= run_script,
                                     datasets=json.dumps([str(dataset)]),

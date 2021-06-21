@@ -18,9 +18,9 @@ username = (
 )
 def homedircode_pipeline(code,dataset,model,dataset_mount_path,model_mount_path): 
     
-    run_script = 'python /mnt/dkube/home'+ str(username) +'/workspace/dkube-examples/mnist/train.py'
+    run_script = 'python /mnt/dkube/home/'+ str(username) +'/workspace/dkube-examples/mnist/train.py'
     
-    train       = dkube_training_op(token, '{"image":"ocdr/dkube-datascience-tf-cpu:v2.0.0"}',
+    train       = dkube_training_op(container='{"image":"ocdr/dkube-datascience-tf-cpu:v2.0.0"}',
                                     framework="custom",
                                     version = "dummy",
                                     run_script= run_script,

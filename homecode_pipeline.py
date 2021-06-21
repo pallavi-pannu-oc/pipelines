@@ -16,7 +16,7 @@ username = (
     name='homedir-pl',
     description='code from home dir'
 )
-def homedircode_pipeline(): 
+def homedircode_pipeline(code,dataset,model): 
     
     run_script = 'python /mnt/dkube/home'+ str(username) +'/workspace/dkube-examples/mnist/train.py'
     

@@ -1,0 +1,24 @@
+
+code:
+  name: external-data
+  url: https://github.com/pallavi-pannu-oc/pipelines.git
+  branch: main
+  private: false
+datasets:
+  - name: heart-data
+    url: 
+models:
+  - name: heart-model
+
+arguments:
+  code: external-data
+  image = "ocdr/d3-datascience-sklearn:v0.23.2-1"
+  ptrain_dataset = "heart-data"
+  train_fs_name = "heart-fs-train"
+  dataset_mount_points = ["/opt/dkube/input"]
+  featureset_mount_points = ["/featureset/train"]
+  preprocessing_script = f"python external_data/preprocessing.py --train_fs {train_fs_name}"
+  model_name = "heart-model"
+  training_script = "python external_data/training.py"
+  train_out_mount_points = ["/model"]
+

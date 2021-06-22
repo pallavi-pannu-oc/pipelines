@@ -18,8 +18,7 @@ if __name__ == "__main__":
     secret_key = creds.split('\n')[2].split('=')[-1].strip()
 
     session = boto3.session.Session()
-    s3_client = boto3.resource(service_name='s3',aws_access_key_id=access_key,aws_secret_access_key=secret_key,
-endpoint_url=config['Endpoint'])
+    s3_client = boto3.resource(service_name='s3',aws_access_key_id=access_key,aws_secret_access_key=secret_key)
 
     s3_client.Bucket(config['Bucket']).download_file('datasets/heart-data/heart.csv', 'heart.csv')
 

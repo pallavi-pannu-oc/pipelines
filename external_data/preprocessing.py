@@ -42,4 +42,4 @@ endpoint_url=config['Endpoint'])
     train_data=pd.read_csv('heart.csv')
     train_data = train_data.drop('ca',axis = 1)
     ## Commit Featureset
-    resp = api.commit_featureset(name=FLAGS.train_fs, df=train_df)
+    resp = api.commit_featureset(name=FLAGS.train_fs, df=train_data)

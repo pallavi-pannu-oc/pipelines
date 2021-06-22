@@ -5,8 +5,6 @@ import joblib
 import pandas as pd
 from dkube.sdk import DkubeApi
 
-from sklearn.ensemble import RandomForestClassifier
-
 if __name__ == "__main__":
     
     DATA_DIR = '/opt/dkube/input'

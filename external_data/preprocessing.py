@@ -3,6 +3,7 @@ import json
 import os
 import joblib
 import pandas as pd
+import argparse
 from dkube.sdk import DkubeApi
 
 if __name__ == "__main__":

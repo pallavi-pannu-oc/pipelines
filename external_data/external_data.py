@@ -6,8 +6,10 @@ import kfp
 search_path = os.path.dirname(os.path.abspath(__file__)) + "/../components"
 component_store = kfp.components.ComponentStore(local_search_paths=[search_path])
 
+dkube_preprocessing_op = component_store.load_component("preprocessing")
+dkube_storage_op = component_store.load_component("storage")
 dkube_training_op = component_store.load_component("training")
-storage_op = component_store.load_component("storage")
+
 
 @kfp.dsl.pipeline(
     name='external_data',
@@ -24,7 +26,7 @@ def externaldata_pipeline(image,
                           training_script,
                           train_out_mount_points):
                           
-     with kfp.dsl.ExitHandler(exit_op=storage_op("reclaim", token, namespace="kubeflow", uid="{{workflow.uid}}")):
+     with kfp.dsl.ExitHandler(exit_op=storage_op("reclaim",namespace="kubeflow", uid="{{workflow.uid}}")):
             
             preprocessing = dkube_preprocessing_op(json.dumps({"image": image}),
                                             program = code,run_script=preprocessing_script,
@@ -34,7 +36,7 @@ def externaldata_pipeline(image,
                                             output_featureset_mounts=json.dumps(featureset_mount_points))
             
             input_volumes = json.dumps(["{{workflow.uid}}-featureset@featureset://" + train_fs_name])
-            storage = storage_op("export",token, namespace="kubeflow", input_volumes=input_volumes,
+            storage = dkube_storage_op("export",token, namespace="kubeflow", input_volumes=input_volumes,
                                  output_volumes=json.dumps(["{{workflow.uid}}-featureset@featureset://"+train_fs_name])).after(preprocessing)
             
        

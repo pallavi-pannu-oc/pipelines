@@ -1,0 +1,28 @@
+code:
+  name: arvados-s3
+  random: False
+  url: https://github.com/pallavi-pannu-oc/pipelines.git
+  branch: main
+  private: false
+datasets:
+  - name: arv-s3
+    random: False
+    source: s3
+    remote: True
+    endpoint: https://download.ce8i5.arvadosapi.com
+    bucket: ce8i5-4zz18-j45o88d58u7js60
+    prefix: .
+    key: 3dnjzwsn4y8mhg03u0mdpucp2jrdcwlskvpmrd1ytdvfippou8
+    secret: 3dnjzwsn4y8mhg03u0mdpucp2jrdcwlskvpmrd1ytdvfippou8
+models:
+  - name: arv-s3
+    random: False
+    source: dvs
+
+arguments:
+  code: arv-s3
+  dataset: arv-s3
+  model: arv-s3
+  run_script: python arvados-s3/arvados-training.py
+  dataset_mount_path: /opt/dkube/input
+  model_mount_path: /opt/dkube/output

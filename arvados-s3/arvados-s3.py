@@ -27,7 +27,7 @@ def arv_pipeline(
         storage = storage_op(
             "export",
             namespace="kubeflow",
-            input_volumes=dataset_volume,
+            input_volumes=dataset_volume
         )
 
         list_dataset = kfp.dsl.ContainerOp(

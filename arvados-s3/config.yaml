@@ -14,8 +14,10 @@ datasets:
     prefix: ""
     key: 3dnjzwsn4y8mhg03u0mdpucp2jrdcwlskvpmrd1ytdvfippou8
     secret: 3dnjzwsn4y8mhg03u0mdpucp2jrdcwlskvpmrd1ytdvfippou8
+    
  - name: output-arvados
- - source: None
+   source: None
+   
 models:
   - name: arv-s3
     random: False

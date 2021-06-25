@@ -23,6 +23,8 @@ def arv_pipeline(
     featureset_mount_points,
     train_out_mount_points,
     training_script,
+    output_dataset,
+    output_mount_path,
     token,
 ):
 
@@ -38,10 +40,13 @@ def arv_pipeline(
             output_featuresets=json.dumps([str(featureset)]),
             input_dataset_mounts=json.dumps([str(dataset_mount_points)]),
             output_featureset_mounts=json.dumps([str(featureset_mount_points)]),
+            outputs = json.dumps([output_dataset]),output_mounts=json.dumps([output_mount_path]))
         )
         dataset_volume = json.dumps(
-            ["{{workflow.uid}}-featureset@featureset://" + str(featureset])
-        )
+            ["{{workflow.uid}}-featureset@featureset://" + train_fs_name,
+            "{{workflow.uid}}-dataset@dataset://" + output_dataset
+            ])
+
 
         storage = storage_op(
             "export", namespace="kubeflow", input_volumes=dataset_volume
@@ -51,9 +56,9 @@ def arv_pipeline(
             name="container-op",
             image="docker.io/ocdr/dkube-datascience-tf-cpu:v2.0.0-3",
             command="bash",
-            arguments=["-c", "ls /featureset/CMU-1"],
+            arguments=["-c", "ls /output-arvados"],
             pvolumes={
-                "/featureset": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-featureset")
+                "/output-arvados": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-dataset")
             },
         ).after(storage)
 

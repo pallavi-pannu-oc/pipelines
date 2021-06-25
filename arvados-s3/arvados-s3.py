@@ -40,7 +40,7 @@ def arv_pipeline(
             output_featureset_mounts=json.dumps([str(featureset_mount_points)]),
         )
         dataset_volume = json.dumps(
-            ["{{workflow.uid}}-dataset@dataset://" + str(dataset)]
+            ["{{workflow.uid}}-featureset@featureset://" + str(featureset])
         )
 
         storage = storage_op(
@@ -51,9 +51,9 @@ def arv_pipeline(
             name="container-op",
             image="docker.io/ocdr/dkube-datascience-tf-cpu:v2.0.0-3",
             command="bash",
-            arguments=["-c", "ls /dataset/CMU-1"],
+            arguments=["-c", "ls /featureset/CMU-1"],
             pvolumes={
-                "/dataset": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-dataset")
+                "/featureset": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-featureset")
             },
         ).after(storage)
 

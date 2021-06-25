@@ -49,13 +49,13 @@ if __name__ == "__main__":
 
     out_path = ["/featureset/train"]
 
-    ## Preprocessed training data
-    # train_data = pd.read_csv("heart.csv")
-    # train_data = train_data.drop("ca", axis=1)
+    ## Preprocessing training data
     arv_data = np.fromfile("Data0000.dat", dtype=float)
     arv_data = arv_data[~np.isnan(arv_data)]
     arv_data = arv_data.reshape(-1, 1)
     arv_data[arv_data <= 1e308] = 0
-    y_values = [0 if i % 2 == 0 else 1 for i in range(1, 91)]
+    x_feature =[i for i in range(1,91)]
+    arv_data = pd.DataFrame(arv_data, columns = ['col1'])
+    arv_data['feature']=x_feature
     ## Commit Featureset
     resp = api.commit_featureset(name=FLAGS.train_fs, df=arv_data)

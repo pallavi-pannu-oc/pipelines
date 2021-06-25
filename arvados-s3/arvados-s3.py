@@ -40,7 +40,7 @@ def arv_pipeline(
             output_featuresets=json.dumps([str(featureset)]),
             input_dataset_mounts=json.dumps([str(dataset_mount_points)]),
             output_featureset_mounts=json.dumps([str(featureset_mount_points)]),
-            outputs = json.dumps([output_dataset]),output_mounts=json.dumps([output_mount_path]))
+            outputs = json.dumps([str(output_dataset)]),output_mounts=json.dumps([str(output_mount_path)]))
         )
         dataset_volume = json.dumps(
             ["{{workflow.uid}}-featureset@featureset://" + train_fs_name,

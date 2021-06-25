@@ -14,6 +14,8 @@ datasets:
     prefix: ""
     key: 3dnjzwsn4y8mhg03u0mdpucp2jrdcwlskvpmrd1ytdvfippou8
     secret: 3dnjzwsn4y8mhg03u0mdpucp2jrdcwlskvpmrd1ytdvfippou8
+ - name: output-arvados
+ - source: None
 models:
   - name: arv-s3
     random: False
@@ -32,4 +34,6 @@ arguments:
   model: arv-s3
   training_script: python arvados-s3*/arvados-training.py
   train_out_mount_points: /model
+  output_dataset: output-arvados
+  output_mount_path: /output-arvados
   token: __TOKEN__

@@ -59,3 +59,4 @@ if __name__ == "__main__":
     arv_data['feature']=x_feature
     ## Commit Featureset
     resp = api.commit_featureset(name=FLAGS.train_fs, df=arv_data)
+    arv_data.to_csv('/opt/dkube/input/output-arvv')

@@ -6,6 +6,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from dkube.sdk import DkubeFeatureSet
+from sklearn.ensemble import RandomForestClassifier
 
 
 MODEL_DIR = "/model/"

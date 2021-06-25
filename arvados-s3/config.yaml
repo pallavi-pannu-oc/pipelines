@@ -1,5 +1,5 @@
 code:
-  name: arvados-s3
+  name: arv-s3
   random: False
   url: https://github.com/pallavi-pannu-oc/pipelines.git
   branch: main
@@ -11,18 +11,25 @@ datasets:
     remote: True
     endpoint: https://download.ce8i5.arvadosapi.com
     bucket: ce8i5-4zz18-j45o88d58u7js60
-    prefix: .
+    prefix: ""
     key: 3dnjzwsn4y8mhg03u0mdpucp2jrdcwlskvpmrd1ytdvfippou8
     secret: 3dnjzwsn4y8mhg03u0mdpucp2jrdcwlskvpmrd1ytdvfippou8
 models:
   - name: arv-s3
     random: False
     source: dvs
+featuresets:
+  - name: arv-s3-fs-train
+    random: False
 
 arguments:
   code: arv-s3
+  preprocessing_script: python arvados-s3/preprocessing.py --train_fs arv-s3-fs-train
   dataset: arv-s3
+  featureset: arv-s3-fs-train
+  dataset_mount_points: /opt/dkube/input
+  featureset_mount_points: /featureset/train
   model: arv-s3
-  run_script: python arvados-s3/arvados-training.py
-  dataset_mount_path: /opt/dkube/input
-  model_mount_path: /opt/dkube/output
+  training_script: python arvados-s3*/arvados-training.py
+  train_out_mount_points: /model
+  token: __TOKEN__

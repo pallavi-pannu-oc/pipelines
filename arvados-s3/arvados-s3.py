@@ -43,8 +43,8 @@ def arv_pipeline(
             outputs = json.dumps([str(output_dataset)]),output_mounts=json.dumps([str(output_mount_path)]))
         )
         dataset_volume = json.dumps(
-            ["{{workflow.uid}}-featureset@featureset://" + train_fs_name,
-            "{{workflow.uid}}-dataset@dataset://" + output_dataset
+            ["{{workflow.uid}}-featureset@featureset://" + str(train_fs_name),
+            "{{workflow.uid}}-dataset@dataset://" + str(output_dataset)
             ])
 
 
@@ -62,21 +62,15 @@ def arv_pipeline(
             },
         ).after(storage)
 
-        train = dkube_training_op(
-            auth_token=str(token),
-            container='{"image":"docker.io/ocdr/d3-datascience-sklearn:v0.23.2"}',
-            framework="sklearn",
-            version="0.23.2",
-            program=str(code),
-            run_script=str(training_script),
-            datasets=json.dumps([str(dataset)]),
-            outputs=json.dumps([str(model)]),
-            input_dataset_mounts=json.dumps([str(dataset_mount_points)]),
-            output_mounts=json.dumps([str(train_out_mount_points)]),
-        ).after(preprocessing)
+        train = dkube_training_op(token, json.dumps({"image": image}),
+                                    framework="sklearn", version="0.23.2",
+                                    program=str(code), run_script=str(training_script),
+                                    featuresets= json.dumps([str(featureset)]), outputs=json.dumps([model]),
+                                    input_featureset_mounts=json.dumps(str(featureset_mount_points)),
+                                    output_mounts=json.dumps(str(train_out_mount_points))).after(preprocessing)
 
         serving = dkube_serving_op(
-            model=model,
+            model=str(model),
             device="cpu",
             serving_image='{"image":"ocdr/sklearnserver:0.23.2"}',
         ).after(train)

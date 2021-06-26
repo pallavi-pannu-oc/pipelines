@@ -1,20 +1,60 @@
+import json
 import os
-import joblib
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
 
-DATA_DIR = "/opt/dkube/input"
-MODEL_DIR = "/opt/dkube/output/"
+import kfp
 
-arv_data = np.fromfile(DATA_DIR+'/CMU-1/Data0000.dat', dtype=float)
-arv_data = arv_data[~np.isnan(arv_data)]
-arv_data = arv_data.reshape(-1,1)
-arv_data[arv_data <= 1E308] = 0
-y_values=[0 if i%2==0 else 1 for i in range(1,91)]
+search_path = os.path.dirname(os.path.abspath(__file__)) + "/../components"
+component_store = kfp.components.ComponentStore(local_search_paths=[search_path])
 
-### Training the model ###
-arv_clf = RandomForestClassifier(max_depth=2, random_state=0)
-arv_clf.fit(arv_data, y_values)
+dkube_training_op = component_store.load_component("training")
+storage_op = component_store.load_component("storage")
+dkube_serving_op = component_store.load_component("serving")
 
-filename = os.path.join(MODEL_DIR, "model.joblib")
-joblib.dump(arv_clf, filename)
+
+@kfp.dsl.pipeline(name="arv-s3", description="arvados-s3-pipeline")
+def arv_pipeline(
+    code, dataset, model, dataset_mount_path, model_mount_path, run_script
+):
+
+    with kfp.dsl.ExitHandler(
+        exit_op=storage_op("reclaim", namespace="kubeflow", uid="{{workflow.uid}}")
+    ):
+
+        dataset_volume = json.dumps(
+            ["{{workflow.uid}}-dataset@dataset://" + str(dataset)]
+        )
+
+        storage = storage_op(
+            "export",
+            namespace="kubeflow",
+            input_volumes=dataset_volume,
+        )
+
+        list_dataset = kfp.dsl.ContainerOp(
+            name="container-op",
+            image="docker.io/ocdr/dkube-datascience-tf-cpu:v2.0.0-3",
+            command="bash",
+            arguments=["-c", "ls /dataset/CMU-1"],
+            pvolumes={
+                "/dataset": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-dataset")
+            },
+        ).after(storage)
+
+        train = dkube_training_op(
+            container='{"image":"docker.io/ocdr/d3-datascience-sklearn:v0.23.2"}',
+            framework="sklearn",
+            version="0.23.2",
+            program=str(code),
+            run_script=str(run_script),
+            datasets=json.dumps([str(dataset)]),
+            outputs=json.dumps([str(model)]),
+            input_dataset_mounts=json.dumps([str(dataset_mount_path)]),
+            output_mounts=json.dumps([str(model_mount_path)]),
+        ).after(storage)
+
+        serving = dkube_serving_op(
+            model=model,
+            device="cpu",
+            serving_image='{"image":"ocdr/sklearnserver:0.23.2"}',
+        ).after(train)
+

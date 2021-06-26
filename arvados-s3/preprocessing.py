@@ -54,9 +54,10 @@ if __name__ == "__main__":
     arv_data = arv_data[~np.isnan(arv_data)]
     arv_data = arv_data.reshape(-1, 1)
     arv_data[arv_data <= 1e308] = 0
-    x_feature =[i for i in range(1,91)]
-    arv_data = pd.DataFrame(arv_data, columns = ['col1'])
-    arv_data['feature']=x_feature
+    x_feature = [i for i in range(1, 91)]
+    arv_data = pd.DataFrame(arv_data, columns=["col1"])
+    arv_data["feature"] = x_feature
     ## Commit Featureset
+    print(arv_data.shape)
     resp = api.commit_featureset(name=FLAGS.train_fs, df=arv_data)
-    arv_data.to_csv('/output-arvados/preprocessed_arvados_data.csv')
+    arv_data.to_csv("/output-arvados/preprocessed_arvados_data.csv")

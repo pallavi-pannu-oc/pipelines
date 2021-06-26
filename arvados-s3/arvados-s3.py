@@ -29,7 +29,12 @@ def arv_pipeline(
 ):
 
     with kfp.dsl.ExitHandler(
-        exit_op=storage_op("reclaim", namespace="kubeflow", uid="{{workflow.uid}}")
+        exit_op=storage_op(
+            "reclaim",
+            auth_token=str(token),
+            namespace="kubeflow",
+            uid="{{workflow.uid}}",
+        )
     ):
         preprocessing = dkube_preprocessing_op(
             auth_token=str(token),
@@ -40,16 +45,22 @@ def arv_pipeline(
             output_featuresets=json.dumps([str(featureset)]),
             input_dataset_mounts=json.dumps([str(dataset_mount_points)]),
             output_featureset_mounts=json.dumps([str(featureset_mount_points)]),
-            outputs = json.dumps([str(output_dataset)]),output_mounts=json.dumps([str(output_mount_path)]))
+            outputs=json.dumps([str(output_dataset)]),
+            output_mounts=json.dumps([str(output_mount_path)]),
         )
-        dataset_volume = json.dumps(
-            ["{{workflow.uid}}-featureset@featureset://" + str(train_fs_name),
-            "{{workflow.uid}}-dataset@dataset://" + str(output_dataset)
-            ])
 
+        dataset_volume = json.dumps(
+            [
+                "{{workflow.uid}}-featureset@featureset://" + str(featureset),
+                "{{workflow.uid}}-dataset@dataset://" + str(output_dataset),
+            ]
+        )
 
         storage = storage_op(
-            "export", namespace="kubeflow", input_volumes=dataset_volume
+            "export",
+            auth_token=str(token),
+            namespace="kubeflow",
+            input_volumes=dataset_volume,
         ).after(preprocessing)
 
         list_dataset = kfp.dsl.ContainerOp(
@@ -58,18 +69,27 @@ def arv_pipeline(
             command="bash",
             arguments=["-c", "ls /output-arvados"],
             pvolumes={
-                "/output-arvados": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-dataset")
+                "/output-arvados": kfp.dsl.PipelineVolume(
+                    pvc="{{workflow.uid}}-dataset"
+                )
             },
         ).after(storage)
 
-        train = dkube_training_op(token, json.dumps({"image": image}),
-                                    framework="sklearn", version="0.23.2",
-                                    program=str(code), run_script=str(training_script),
-                                    featuresets= json.dumps([str(featureset)]), outputs=json.dumps([model]),
-                                    input_featureset_mounts=json.dumps(str(featureset_mount_points)),
-                                    output_mounts=json.dumps(str(train_out_mount_points))).after(preprocessing)
+        train = dkube_training_op(
+            auth_token=str(token),
+            container='{"image":"docker.io/ocdr/d3-datascience-sklearn:v0.23.2"}',
+            framework="sklearn",
+            version="0.23.2",
+            program=str(code),
+            run_script=str(training_script),
+            featuresets=json.dumps([str(featureset)]),
+            outputs=json.dumps([str(model)]),
+            input_featureset_mounts=json.dumps([str(featureset_mount_points)]),
+            output_mounts=json.dumps([str(train_out_mount_points)]),
+        ).after(preprocessing)
 
         serving = dkube_serving_op(
+            auth_token=str(token),
             model=str(model),
             device="cpu",
             serving_image='{"image":"ocdr/sklearnserver:0.23.2"}',

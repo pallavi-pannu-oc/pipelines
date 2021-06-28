@@ -3,6 +3,7 @@ code:
   url: https://github.com/pallavi-pannu-oc/pipelines.git
   branch: main
   private: false
+ 
 datasets:
   - name: storageop-remote-data
     random: False
@@ -16,6 +17,8 @@ datasets:
   - name: output-dataset-tc
     random: False
 
+models:
+  - name: storage-op-tc
 arguments:
   code: storageop-tc
   preprocessing_script: python storageop-tc/download_data.py
@@ -23,5 +26,7 @@ arguments:
   dataset_mount_points: /opt/dkube/input
   output_dataset: output-dataset-tc
   output_mount_path: /output-dataset-tc
+  dataset_version: v1
+  model_version: v1
   token: __TOKEN__
 

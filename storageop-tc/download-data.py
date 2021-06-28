@@ -26,4 +26,4 @@ s3_client.Bucket(config["Bucket"]).download_file(
     "CMU-1/Data0000.dat", "Data0000.dat"
 )
 
-shutil.copy("Data0000.dat", "/opt/dkube/input/")
+shutil.copy("Data0000.dat", "/output-tc")

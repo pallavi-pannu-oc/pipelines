@@ -60,16 +60,6 @@ def externaldata_pipeline(
             ),
         ).after(preprocessing)
 
-        list_featureset = kfp.dsl.ContainerOp(
-            name="list-storage",
-            image="alpine",
-            command="bash",
-            arguments=["-c", "ls /featureset"],
-            pvolumes={
-                "/featureset": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-featureset")
-            },
-        ).after(storage)
-
         train = dkube_training_op(
             auth_token=str(token),
             container=json.dumps({"image": "ocdr/d3-datascience-sklearn:v0.23.2-1"}),

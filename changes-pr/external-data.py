@@ -68,7 +68,7 @@ def externaldata_pipeline(
             name="list-storage",
             image="alpine",
             command="bash",
-            arguments=["-c","FILE='/heartdata/heart.csv'; if test -f "FILE"; then echo "heart data exists"; else echo "heart data does not exist"]],
+            arguments=["-c","FILE='/heartdata/heart.csv'; if test -f "$FILE"; then echo "heart data exists", else echo "heart data does not exist",fi],
             pvolumes={
                 "/heartdata": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-dataset")
             },

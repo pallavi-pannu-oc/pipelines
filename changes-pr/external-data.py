@@ -18,6 +18,8 @@ def externaldata_pipeline(
     code,
     preprocessing_script,
     dataset,
+    output_dataset,
+    output_mount_path,
     featureset,
     dataset_mount_points,
     featureset_mount_points,
@@ -42,13 +44,15 @@ def externaldata_pipeline(
             program=str(code),
             run_script=str(preprocessing_script),
             datasets=json.dumps([str(dataset)]),
+            outputs=json.dumps([str(output_dataset)]),
+            output_mounts=json.dumps([str(output_mount_path)]),
             output_featuresets=json.dumps([str(featureset)]),
             input_dataset_mounts=json.dumps([str(dataset_mount_points)]),
-            output_featureset_mounts=json.dumps([str(featureset_mount_points)]),
+            output_featureset_mounts=json.dumps([str(featureset_mount_points)])
         )
 
         input_volumes = json.dumps(
-            ["{{workflow.uid}}-featureset@featureset://" + str(featureset)]
+            ["{{workflow.uid}}-dataset@dataset://" + str(output_dataset)]
         )
         storage = dkube_storage_op(
             "export",
@@ -56,9 +60,19 @@ def externaldata_pipeline(
             namespace="kubeflow",
             input_volumes=input_volumes,
             output_volumes=json.dumps(
-                ["{{workflow.uid}}-featureset@featureset://" + str(featureset)]
+                ["{{workflow.uid}}-dataset@dataset://" + str(output_dataset)]
             ),
         ).after(preprocessing)
+        
+        list_dataset = kfp.dsl.ContainerOp(
+            name="list-storage",
+            image="alpine",
+            command="bash",
+            arguments=["-c","FILE='/heartdata/heart.csv'; if test -f "FILE"; then echo "heart data exists"; else echo "heart data does not exist"]],
+            pvolumes={
+                "/heartdata": kfp.dsl.PipelineVolume(pvc="{{workflow.uid}}-dataset")
+            },
+        ).after(storage)
 
         train = dkube_training_op(
             auth_token=str(token),

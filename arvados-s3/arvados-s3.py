@@ -67,7 +67,7 @@ def arv_pipeline(
             name="container-op",
             image="docker.io/ocdr/dkube-datascience-tf-cpu:v2.0.0-3",
             command="bash",
-            arguments=["-c", "ls /output-arvados"],
+            arguments=["-c", "FILE='/output-arvados/heart-data.csv'; if test -f "FILE"; then echo "heart data exists"; else echo "heart data does not exist"],
             pvolumes={
                 "/output-arvados": kfp.dsl.PipelineVolume(
                     pvc="{{workflow.uid}}-dataset"
